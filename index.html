@@ -1,0 +1,984 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RBX Vault — Account Generator</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #050a0f;
+    --surface: #0d1821;
+    --surface2: #112233;
+    --accent: #00e5ff;
+    --accent2: #ff3c6e;
+    --gold: #ffd700;
+    --text: #cde8ff;
+    --muted: #4a7090;
+    --border: rgba(0,229,255,0.15);
+    --glow: 0 0 20px rgba(0,229,255,0.3);
+    --glow2: 0 0 20px rgba(255,60,110,0.3);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Rajdhani', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Animated background grid */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,229,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,229,255,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* Glowing orbs */
+  body::after {
+    content: '';
+    position: fixed;
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(0,229,255,0.06) 0%, transparent 70%);
+    top: -200px; right: -200px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    position: relative;
+    z-index: 1;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+
+  /* HEADER */
+  header {
+    text-align: center;
+    padding: 40px 20px 30px;
+    position: relative;
+  }
+
+  .logo {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(28px, 6vw, 52px);
+    font-weight: 900;
+    letter-spacing: 4px;
+    background: linear-gradient(135deg, var(--accent), #ffffff, var(--accent));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: none;
+    filter: drop-shadow(0 0 20px rgba(0,229,255,0.5));
+    animation: pulse-logo 3s ease-in-out infinite;
+  }
+
+  @keyframes pulse-logo {
+    0%, 100% { filter: drop-shadow(0 0 20px rgba(0,229,255,0.5)); }
+    50% { filter: drop-shadow(0 0 40px rgba(0,229,255,0.9)); }
+  }
+
+  .logo span { color: var(--accent2); -webkit-text-fill-color: var(--accent2); }
+
+  .tagline {
+    font-size: 13px;
+    letter-spacing: 6px;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-top: 6px;
+  }
+
+  /* TABS */
+  .tabs {
+    display: flex;
+    gap: 4px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 4px;
+    margin-bottom: 24px;
+  }
+
+  .tab-btn {
+    flex: 1;
+    padding: 10px;
+    background: transparent;
+    border: none;
+    color: var(--muted);
+    font-family: 'Orbitron', monospace;
+    font-size: 11px;
+    letter-spacing: 2px;
+    cursor: pointer;
+    border-radius: 7px;
+    transition: all 0.3s;
+    text-transform: uppercase;
+  }
+
+  .tab-btn.active {
+    background: var(--surface2);
+    color: var(--accent);
+    box-shadow: var(--glow);
+    border: 1px solid var(--border);
+  }
+
+  .tab-btn:hover:not(.active) { color: var(--text); }
+
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* MAIN CARD */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 32px;
+    margin-bottom: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  }
+
+  /* GENERATE BUTTON */
+  .gen-btn {
+    width: 100%;
+    padding: 20px;
+    background: linear-gradient(135deg, rgba(0,229,255,0.15), rgba(0,229,255,0.05));
+    border: 1px solid var(--accent);
+    border-radius: 12px;
+    color: var(--accent);
+    font-family: 'Orbitron', monospace;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-transform: uppercase;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .gen-btn::before {
+    content: '';
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 0; height: 0;
+    background: rgba(0,229,255,0.1);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+  }
+
+  .gen-btn:hover::before { width: 400px; height: 400px; }
+
+  .gen-btn:hover {
+    background: linear-gradient(135deg, rgba(0,229,255,0.25), rgba(0,229,255,0.1));
+    box-shadow: var(--glow), inset 0 0 20px rgba(0,229,255,0.05);
+    transform: translateY(-2px);
+  }
+
+  .gen-btn:disabled {
+    border-color: var(--muted);
+    color: var(--muted);
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  .gen-btn:disabled::before { display: none; }
+
+  /* COOLDOWN BAR */
+  .cooldown-wrap {
+    margin-top: 20px;
+    display: none;
+  }
+
+  .cooldown-wrap.show { display: block; }
+
+  .cooldown-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    letter-spacing: 2px;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .cooldown-label span { color: var(--accent2); }
+
+  .cooldown-bar {
+    height: 4px;
+    background: var(--surface2);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .cooldown-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent2), var(--accent));
+    border-radius: 2px;
+    transition: width 1s linear;
+    box-shadow: 0 0 8px var(--accent2);
+  }
+
+  /* ACCOUNT RESULT */
+  .result-box {
+    margin-top: 24px;
+    display: none;
+  }
+
+  .result-box.show { display: block; animation: slide-in 0.4s ease; }
+
+  @keyframes slide-in {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .result-label {
+    font-size: 11px;
+    letter-spacing: 3px;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+
+  .account-display {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .account-display .creds {
+    font-family: 'Orbitron', monospace;
+    font-size: 15px;
+    color: var(--accent);
+    letter-spacing: 1px;
+    word-break: break-all;
+  }
+
+  .account-display .creds em {
+    color: var(--muted);
+    font-style: normal;
+    margin: 0 4px;
+  }
+
+  .copy-btn {
+    padding: 8px 20px;
+    background: transparent;
+    border: 1px solid var(--accent);
+    border-radius: 6px;
+    color: var(--accent);
+    font-family: 'Orbitron', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .copy-btn:hover { background: rgba(0,229,255,0.1); }
+  .copy-btn.copied { border-color: #00ff88; color: #00ff88; }
+
+  /* STATS */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+    text-align: center;
+  }
+
+  .stat-num {
+    font-family: 'Orbitron', monospace;
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--accent);
+  }
+
+  .stat-num.red { color: var(--accent2); }
+  .stat-num.gold { color: var(--gold); }
+
+  .stat-lbl {
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-top: 4px;
+  }
+
+  /* SECTION TITLE */
+  .section-title {
+    font-family: 'Orbitron', monospace;
+    font-size: 13px;
+    letter-spacing: 3px;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 14px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* ADMIN ADD FORM */
+  .add-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+
+  .input-group {
+    display: flex;
+    gap: 10px;
+  }
+
+  textarea, input[type="text"], input[type="password"] {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 14px;
+    padding: 12px 16px;
+    outline: none;
+    transition: border-color 0.2s;
+    resize: vertical;
+  }
+
+  textarea:focus, input[type="text"]:focus, input[type="password"]:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px rgba(0,229,255,0.08);
+  }
+
+  textarea { min-height: 140px; font-size: 13px; }
+
+  .admin-btn {
+    padding: 12px 28px;
+    border-radius: 8px;
+    font-family: 'Orbitron', monospace;
+    font-size: 11px;
+    letter-spacing: 2px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-transform: uppercase;
+    border: none;
+    white-space: nowrap;
+  }
+
+  .admin-btn.primary {
+    background: linear-gradient(135deg, rgba(0,229,255,0.2), rgba(0,229,255,0.1));
+    border: 1px solid var(--accent);
+    color: var(--accent);
+  }
+
+  .admin-btn.primary:hover { background: rgba(0,229,255,0.25); }
+
+  .admin-btn.danger {
+    background: linear-gradient(135deg, rgba(255,60,110,0.2), rgba(255,60,110,0.1));
+    border: 1px solid var(--accent2);
+    color: var(--accent2);
+  }
+
+  .admin-btn.danger:hover { background: rgba(255,60,110,0.25); }
+
+  /* ACCOUNT LIST */
+  .account-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    max-height: 360px;
+    overflow-y: auto;
+    padding-right: 4px;
+  }
+
+  .account-list::-webkit-scrollbar { width: 4px; }
+  .account-list::-webkit-scrollbar-track { background: var(--surface2); border-radius: 2px; }
+  .account-list::-webkit-scrollbar-thumb { background: var(--muted); border-radius: 2px; }
+
+  .acc-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 13px;
+  }
+
+  .acc-item .acc-status {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .acc-status.available { background: #00ff88; box-shadow: 0 0 6px #00ff88; }
+  .acc-status.used { background: var(--accent2); box-shadow: 0 0 6px var(--accent2); }
+
+  .acc-item .acc-user { flex: 1; color: var(--accent); font-family: 'Orbitron', monospace; font-size: 11px; }
+  .acc-item .acc-pass { color: var(--muted); font-size: 12px; word-break: break-all; }
+  .acc-item .acc-tag {
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    letter-spacing: 1px;
+  }
+
+  .acc-tag.used-tag {
+    background: rgba(255,60,110,0.15);
+    border: 1px solid rgba(255,60,110,0.3);
+    color: var(--accent2);
+  }
+
+  .acc-tag.avail-tag {
+    background: rgba(0,255,136,0.1);
+    border: 1px solid rgba(0,255,136,0.3);
+    color: #00ff88;
+  }
+
+  .del-btn {
+    background: none;
+    border: none;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 16px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    transition: color 0.2s;
+    line-height: 1;
+    flex-shrink: 0;
+  }
+
+  .del-btn:hover { color: var(--accent2); }
+
+  /* ADMIN LOGIN */
+  .admin-login {
+    max-width: 360px;
+    margin: 60px auto;
+    text-align: center;
+  }
+
+  .admin-login h2 {
+    font-family: 'Orbitron', monospace;
+    font-size: 18px;
+    letter-spacing: 3px;
+    color: var(--accent);
+    margin-bottom: 8px;
+  }
+
+  .admin-login p {
+    color: var(--muted);
+    font-size: 13px;
+    letter-spacing: 1px;
+    margin-bottom: 24px;
+  }
+
+  .login-error {
+    color: var(--accent2);
+    font-size: 12px;
+    margin-top: 10px;
+    display: none;
+  }
+
+  .login-error.show { display: block; }
+
+  /* TOAST */
+  .toast {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    background: var(--surface2);
+    border: 1px solid var(--accent);
+    border-radius: 8px;
+    padding: 12px 20px;
+    font-family: 'Orbitron', monospace;
+    font-size: 11px;
+    letter-spacing: 1px;
+    color: var(--accent);
+    box-shadow: var(--glow);
+    z-index: 999;
+    transform: translateX(120%);
+    transition: transform 0.3s ease;
+  }
+
+  .toast.show { transform: translateX(0); }
+
+  /* EMPTY STATE */
+  .empty-state {
+    text-align: center;
+    padding: 40px;
+    color: var(--muted);
+    font-size: 13px;
+    letter-spacing: 2px;
+  }
+
+  .input-row {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+
+  .input-row textarea { flex: 1; }
+
+  .badge {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 20px;
+    font-size: 10px;
+    font-family: 'Orbitron', monospace;
+    letter-spacing: 1px;
+  }
+
+  .no-accounts-warn {
+    background: rgba(255,60,110,0.1);
+    border: 1px solid rgba(255,60,110,0.3);
+    border-radius: 8px;
+    padding: 12px 16px;
+    color: var(--accent2);
+    font-size: 13px;
+    letter-spacing: 1px;
+    margin-bottom: 16px;
+    display: none;
+  }
+
+  .no-accounts-warn.show { display: block; }
+
+  @media (max-width: 500px) {
+    .stats-row { grid-template-columns: 1fr 1fr; }
+    .account-display { flex-direction: column; align-items: flex-start; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <div class="logo">RBX<span>VAULT</span></div>
+    <div class="tagline">Account Generator System</div>
+  </header>
+
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('gen')">⚡ Gerar</button>
+    <button class="tab-btn" onclick="switchTab('admin')" id="admin-tab-btn">🔒 Admin</button>
+  </div>
+
+  <!-- GENERATE TAB -->
+  <div class="tab-panel active" id="tab-gen">
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-num" id="stat-total">0</div>
+        <div class="stat-lbl">Total</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num" id="stat-avail">0</div>
+        <div class="stat-lbl">Disponíveis</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num red" id="stat-used">0</div>
+        <div class="stat-lbl">Usadas</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="no-accounts-warn" id="no-acc-warn">
+        ⚠ Sem contas disponíveis. Contate o administrador.
+      </div>
+
+      <button class="gen-btn" id="gen-btn" onclick="generateAccount()">
+        ⚡ GERAR CONTA
+      </button>
+
+      <div class="cooldown-wrap" id="cooldown-wrap">
+        <div class="cooldown-label">
+          <span>COOLDOWN ATIVO</span>
+          <span id="cooldown-timer">02:00:00</span>
+        </div>
+        <div class="cooldown-bar">
+          <div class="cooldown-fill" id="cooldown-fill" style="width:100%"></div>
+        </div>
+      </div>
+
+      <div class="result-box" id="result-box">
+        <div class="result-label">Conta gerada com sucesso</div>
+        <div class="account-display">
+          <div class="creds" id="result-creds">—</div>
+          <button class="copy-btn" id="copy-btn" onclick="copyAccount()">COPIAR</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADMIN TAB -->
+  <div class="tab-panel" id="tab-admin">
+    <!-- Login screen -->
+    <div id="admin-login-screen">
+      <div class="admin-login">
+        <h2>PAINEL ADMIN</h2>
+        <p>ACESSO RESTRITO</p>
+        <input type="password" id="admin-pass-input" placeholder="Senha de acesso..." onkeydown="if(event.key==='Enter')adminLogin()">
+        <div style="margin-top:12px;">
+          <button class="admin-btn primary" onclick="adminLogin()" style="width:100%">ENTRAR</button>
+        </div>
+        <div class="login-error" id="login-error">Senha incorreta.</div>
+      </div>
+    </div>
+
+    <!-- Admin panel -->
+    <div id="admin-panel" style="display:none">
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-num" id="a-stat-total">0</div>
+          <div class="stat-lbl">Total</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num" id="a-stat-avail">0</div>
+          <div class="stat-lbl">Disponíveis</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num red" id="a-stat-used">0</div>
+          <div class="stat-lbl">Usadas</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="section-title">Adicionar Contas</div>
+        <div class="add-form">
+          <div class="input-row">
+            <textarea id="bulk-input" placeholder="Cole as contas aqui (uma por linha)&#10;Formato: usuario:senha&#10;&#10;Exemplo:&#10;DoomSofia2929:Defense/82631436#&%&*#&#10;imStormCrow:Defense/18414873#&%&*#"></textarea>
+          </div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <button class="admin-btn primary" onclick="addAccounts()">+ ADICIONAR</button>
+            <button class="admin-btn danger" onclick="clearUsed()">🗑 LIMPAR USADAS</button>
+            <button class="admin-btn danger" onclick="resetAll()">⚠ RESET TOTAL</button>
+            <button class="admin-btn" style="border:1px solid var(--muted);color:var(--muted);background:transparent;margin-left:auto" onclick="adminLogout()">SAIR</button>
+          </div>
+        </div>
+
+        <div class="section-title">Contas no Sistema</div>
+        <div class="account-list" id="admin-acc-list">
+          <div class="empty-state">Nenhuma conta cadastrada</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ─── STATE ─────────────────────────────────────────────
+const ADMIN_PASSWORD = 'admin123'; // Change this!
+const COOLDOWN_MS = 2 * 60 * 60 * 1000; // 2 hours
+
+let state = loadState();
+let cooldownInterval = null;
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem('rbxvault');
+    if (raw) return JSON.parse(raw);
+  } catch(e) {}
+  return { accounts: [], lastGen: null };
+}
+
+function saveState() {
+  localStorage.setItem('rbxvault', JSON.stringify(state));
+}
+
+// Default accounts
+if (state.accounts.length === 0) {
+  const defaults = [
+    'DoomSofia2929:Defense/82631436#&%&*#',
+    'FallenBex9740:Defense/23220093#&%&*#',
+    'imStormCrow:Defense/18414873#&%&*#',
+    'JaydenArr0w202334:Generated$5088192',
+    'idkIronDestroyer:Defense/75677107#&%&*#',
+    'DarkEdge7017:Defense/86899162#&%&*#',
+    'abelreaperzx1357:Defense/51232293#&%&*#',
+    'BrooklynChaos201695:Generated$2691457',
+    'AriaDriftStarry2002:Generated$1626236',
+    'shadowscytheon3665:Defense/77033076#&%&*#'
+  ];
+  state.accounts = defaults.map(a => {
+    const [user, pass] = a.split(':');
+    return { user, pass, used: false };
+  });
+  saveState();
+}
+
+// ─── COOLDOWN ──────────────────────────────────────────
+function getCooldownRemaining() {
+  if (!state.lastGen) return 0;
+  const elapsed = Date.now() - state.lastGen;
+  return Math.max(0, COOLDOWN_MS - elapsed);
+}
+
+function formatTime(ms) {
+  const total = Math.floor(ms / 1000);
+  const h = String(Math.floor(total / 3600)).padStart(2, '0');
+  const m = String(Math.floor((total % 3600) / 60)).padStart(2, '0');
+  const s = String(total % 60).padStart(2, '0');
+  return `${h}:${m}:${s}`;
+}
+
+function startCooldownUI() {
+  const wrap = document.getElementById('cooldown-wrap');
+  const btn = document.getElementById('gen-btn');
+  const timer = document.getElementById('cooldown-timer');
+  const fill = document.getElementById('cooldown-fill');
+
+  if (cooldownInterval) clearInterval(cooldownInterval);
+
+  function update() {
+    const rem = getCooldownRemaining();
+    if (rem <= 0) {
+      wrap.classList.remove('show');
+      btn.disabled = false;
+      btn.textContent = '⚡ GERAR CONTA';
+      clearInterval(cooldownInterval);
+      cooldownInterval = null;
+      updateStats();
+      return;
+    }
+    wrap.classList.add('show');
+    btn.disabled = true;
+    btn.textContent = '⏳ COOLDOWN ATIVO';
+    timer.textContent = formatTime(rem);
+    fill.style.width = ((rem / COOLDOWN_MS) * 100) + '%';
+  }
+
+  update();
+  cooldownInterval = setInterval(update, 1000);
+}
+
+// ─── GENERATE ──────────────────────────────────────────
+function generateAccount() {
+  const available = state.accounts.filter(a => !a.used);
+
+  if (available.length === 0) {
+    document.getElementById('no-acc-warn').classList.add('show');
+    showToast('Sem contas disponíveis!');
+    return;
+  }
+
+  const acc = available[Math.floor(Math.random() * available.length)];
+  acc.used = true;
+  state.lastGen = Date.now();
+  saveState();
+
+  // Show result
+  const creds = document.getElementById('result-creds');
+  creds.innerHTML = `${acc.user}<em>:</em>${acc.pass}`;
+  creds.dataset.full = `${acc.user}:${acc.pass}`;
+
+  document.getElementById('copy-btn').textContent = 'COPIAR';
+  document.getElementById('copy-btn').classList.remove('copied');
+  document.getElementById('result-box').classList.add('show');
+  document.getElementById('no-acc-warn').classList.remove('show');
+
+  startCooldownUI();
+  updateStats();
+  showToast('Conta gerada com sucesso!');
+}
+
+function copyAccount() {
+  const creds = document.getElementById('result-creds');
+  const text = creds.dataset.full || creds.textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.getElementById('copy-btn');
+    btn.textContent = '✓ COPIADO';
+    btn.classList.add('copied');
+    setTimeout(() => {
+      btn.textContent = 'COPIAR';
+      btn.classList.remove('copied');
+    }, 2000);
+  });
+}
+
+// ─── STATS ─────────────────────────────────────────────
+function updateStats() {
+  const total = state.accounts.length;
+  const used = state.accounts.filter(a => a.used).length;
+  const avail = total - used;
+
+  document.getElementById('stat-total').textContent = total;
+  document.getElementById('stat-avail').textContent = avail;
+  document.getElementById('stat-used').textContent = used;
+
+  document.getElementById('a-stat-total').textContent = total;
+  document.getElementById('a-stat-avail').textContent = avail;
+  document.getElementById('a-stat-used').textContent = used;
+
+  const genBtn = document.getElementById('gen-btn');
+  const warn = document.getElementById('no-acc-warn');
+
+  if (avail === 0 && getCooldownRemaining() <= 0) {
+    warn.classList.add('show');
+    genBtn.disabled = true;
+  } else if (getCooldownRemaining() <= 0) {
+    warn.classList.remove('show');
+    genBtn.disabled = false;
+  }
+}
+
+// ─── ADMIN ─────────────────────────────────────────────
+let adminLoggedIn = false;
+
+function adminLogin() {
+  const pass = document.getElementById('admin-pass-input').value;
+  const err = document.getElementById('login-error');
+  if (pass === ADMIN_PASSWORD) {
+    adminLoggedIn = true;
+    document.getElementById('admin-login-screen').style.display = 'none';
+    document.getElementById('admin-panel').style.display = 'block';
+    err.classList.remove('show');
+    renderAdminList();
+    updateStats();
+  } else {
+    err.classList.add('show');
+    document.getElementById('admin-pass-input').value = '';
+  }
+}
+
+function adminLogout() {
+  adminLoggedIn = false;
+  document.getElementById('admin-login-screen').style.display = 'block';
+  document.getElementById('admin-panel').style.display = 'none';
+  document.getElementById('admin-pass-input').value = '';
+  switchTab('gen');
+}
+
+function addAccounts() {
+  const raw = document.getElementById('bulk-input').value.trim();
+  if (!raw) { showToast('Cole as contas primeiro!'); return; }
+
+  const lines = raw.split('\n').map(l => l.trim()).filter(Boolean);
+  let added = 0, skipped = 0;
+
+  lines.forEach(line => {
+    const colonIdx = line.indexOf(':');
+    if (colonIdx === -1) { skipped++; return; }
+    const user = line.slice(0, colonIdx).trim();
+    const pass = line.slice(colonIdx + 1).trim();
+    if (!user || !pass) { skipped++; return; }
+
+    const exists = state.accounts.some(a => a.user.toLowerCase() === user.toLowerCase());
+    if (exists) { skipped++; return; }
+
+    state.accounts.push({ user, pass, used: false });
+    added++;
+  });
+
+  saveState();
+  document.getElementById('bulk-input').value = '';
+  renderAdminList();
+  updateStats();
+  showToast(`+${added} conta(s) adicionada(s)${skipped ? `, ${skipped} ignorada(s)` : ''}`);
+}
+
+function deleteAccount(index) {
+  state.accounts.splice(index, 1);
+  saveState();
+  renderAdminList();
+  updateStats();
+  showToast('Conta removida');
+}
+
+function clearUsed() {
+  state.accounts = state.accounts.filter(a => !a.used);
+  saveState();
+  renderAdminList();
+  updateStats();
+  showToast('Contas usadas removidas');
+}
+
+function resetAll() {
+  if (!confirm('Tem certeza? Isso marca todas as contas como disponíveis novamente.')) return;
+  state.accounts.forEach(a => a.used = false);
+  state.lastGen = null;
+  saveState();
+  renderAdminList();
+  updateStats();
+  if (cooldownInterval) { clearInterval(cooldownInterval); cooldownInterval = null; }
+  document.getElementById('cooldown-wrap').classList.remove('show');
+  document.getElementById('gen-btn').disabled = false;
+  document.getElementById('gen-btn').textContent = '⚡ GERAR CONTA';
+  document.getElementById('no-acc-warn').classList.remove('show');
+  showToast('Sistema resetado!');
+}
+
+function renderAdminList() {
+  const list = document.getElementById('admin-acc-list');
+  if (state.accounts.length === 0) {
+    list.innerHTML = '<div class="empty-state">Nenhuma conta cadastrada</div>';
+    return;
+  }
+
+  list.innerHTML = state.accounts.map((a, i) => `
+    <div class="acc-item">
+      <span class="acc-status ${a.used ? 'used' : 'available'}"></span>
+      <span class="acc-user">${escHtml(a.user)}</span>
+      <span class="acc-pass">${escHtml(a.pass)}</span>
+      <span class="acc-tag ${a.used ? 'used-tag' : 'avail-tag'}">${a.used ? 'USADA' : 'LIVRE'}</span>
+      <button class="del-btn" onclick="deleteAccount(${i})" title="Remover">×</button>
+    </div>
+  `).join('');
+}
+
+function escHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ─── TABS ───────────────────────────────────────────────
+function switchTab(tab) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  document.querySelectorAll('.tab-btn')[tab === 'gen' ? 0 : 1].classList.add('active');
+}
+
+// ─── TOAST ──────────────────────────────────────────────
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+// ─── INIT ───────────────────────────────────────────────
+updateStats();
+if (getCooldownRemaining() > 0) startCooldownUI();
+</script>
+</body>
+</html>
